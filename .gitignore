@@ -35,3 +35,4 @@ SUGGESTIONS.md
 *.class
 /build/classes
 /build
+lastchangelog.md
