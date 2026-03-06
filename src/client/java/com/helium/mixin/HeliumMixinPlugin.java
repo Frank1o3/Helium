@@ -14,6 +14,8 @@ public class HeliumMixinPlugin implements IMixinConfigPlugin {
     private boolean hasPlatformGlStateManager = false;
     private boolean hasImmediatelyFast = false;
     private boolean hasModernSodiumApi = false;
+    private boolean hasSodium = false;
+    private boolean hasIris = false;
 
     @Override
     public void onLoad(String mixinPackage) {
@@ -21,6 +23,8 @@ public class HeliumMixinPlugin implements IMixinConfigPlugin {
         hasPlatformGlStateManager = classExistsOnClasspath("com/mojang/blaze3d/platform/GlStateManager.class");
         hasImmediatelyFast = FabricLoader.getInstance().isModLoaded("immediatelyfast");
         hasModernSodiumApi = classExistsOnClasspath("net/caffeinemc/mods/sodium/api/config/ConfigEntryPoint.class");
+        hasSodium = FabricLoader.getInstance().isModLoaded("sodium");
+        hasIris = FabricLoader.getInstance().isModLoaded("iris");
     }
 
     @Override
@@ -38,6 +42,33 @@ public class HeliumMixinPlugin implements IMixinConfigPlugin {
         }
         if (mixinClassName.endsWith("SodiumOptionsGUILegacyMixin")) {
             return !hasModernSodiumApi;
+        }
+        if (mixinClassName.endsWith("SodiumLeafCullingMixin")) {
+            return hasSodium;
+        }
+        if (mixinClassName.endsWith("LeafCullingMixin")) {
+            return !hasSodium;
+        }
+        if (mixinClassName.endsWith("IrisShaderCacheMixin")) {
+            return hasIris;
+        }
+        if (mixinClassName.endsWith("MathHelperFloatMixin")) {
+            return !hasOpenGlStateManager;
+        }
+        if (mixinClassName.endsWith("MathHelperDoubleMixin")) {
+            return hasOpenGlStateManager;
+        }
+        if (mixinClassName.endsWith("EndGatewayBeamCullingMixin")) {
+            return hasOpenGlStateManager;
+        }
+        if (mixinClassName.endsWith("BeaconBeamCullingMixin")) {
+            return hasOpenGlStateManager;
+        }
+        if (mixinClassName.endsWith("PaintingCullingMixin")) {
+            return hasOpenGlStateManager;
+        }
+        if (mixinClassName.endsWith("ItemFrameCullingMixin")) {
+            return hasOpenGlStateManager;
         }
         return true;
     }

@@ -14,6 +14,7 @@ public final class RenderBatcher {
     private static int vertexCount = 0;
     private static int currentTexture = -1;
     private static boolean batching = false;
+    private static boolean bufferFlipped = false;
 
     private RenderBatcher() {}
 
@@ -25,6 +26,7 @@ public final class RenderBatcher {
         vertexCount = 0;
         currentTexture = textureId;
         batching = true;
+        bufferFlipped = false;
     }
 
     public static boolean isBatching() {
@@ -54,8 +56,9 @@ public final class RenderBatcher {
     }
 
     public static ByteBuffer getBuffer() {
-        if (vertexBuffer != null) {
+        if (vertexBuffer != null && !bufferFlipped) {
             vertexBuffer.flip();
+            bufferFlipped = true;
         }
         return vertexBuffer;
     }

@@ -5,8 +5,10 @@ import com.helium.HeliumClient;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.lang.ref.WeakReference;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.atomic.AtomicLong;
@@ -19,6 +21,7 @@ public final class NativeMemoryManager {
     private static final ConcurrentLinkedDeque<ByteBuffer>[] POOLS = new ConcurrentLinkedDeque[POOL_SIZES.length];
 
     private static final ConcurrentHashMap<Long, AllocationInfo> allocations = new ConcurrentHashMap<>();
+    private static final Map<ByteBuffer, Long> bufferToId = Collections.synchronizedMap(new IdentityHashMap<>());
     private static final AtomicLong cleanupCounter = new AtomicLong(0);
     private static final int CLEANUP_INTERVAL = 1000;
     private static final AtomicLong allocationIdCounter = new AtomicLong(0);
@@ -81,6 +84,7 @@ public final class NativeMemoryManager {
 
         long id = allocationIdCounter.incrementAndGet();
         allocations.put(id, new AllocationInfo(new WeakReference<>(buffer), actualSize, poolIndex));
+        bufferToId.put(buffer, id);
 
         return buffer;
     }
@@ -88,21 +92,11 @@ public final class NativeMemoryManager {
     public static void free(ByteBuffer buffer) {
         if (!initialized || buffer == null || !buffer.isDirect()) return;
 
-        Long idToRemove = null;
+        Long idToRemove = bufferToId.remove(buffer);
         AllocationInfo info = null;
 
-        for (var entry : allocations.entrySet()) {
-            AllocationInfo ai = entry.getValue();
-            ByteBuffer ref = ai.bufferRef.get();
-            if (ref == buffer) {
-                idToRemove = entry.getKey();
-                info = ai;
-                break;
-            }
-        }
-
         if (idToRemove != null) {
-            allocations.remove(idToRemove);
+            info = allocations.remove(idToRemove);
         }
 
         if (info != null && info.poolIndex >= 0) {
@@ -197,6 +191,7 @@ public final class NativeMemoryManager {
             }
         }
         allocations.clear();
+        bufferToId.clear();
         totalAllocatedBytes.set(0);
         totalPooledBytes.set(0);
         initialized = false;

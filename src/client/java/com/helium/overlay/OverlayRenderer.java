@@ -3,10 +3,12 @@ package com.helium.overlay;
 import com.helium.HeliumClient;
 import com.helium.config.HeliumConfig;
 import com.helium.particle.ParticleLimiter;
+import com.helium.tweaks.AsyncPackReloader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.text.Text;
+import net.minecraft.util.Util;
 
 public final class OverlayRenderer {
 
@@ -14,20 +16,19 @@ public final class OverlayRenderer {
     private static final int LINE_HEIGHT = 10;
     private static final int SHADOW_OFFSET = 1;
 
+    private static final String[] SPINNER_FRAMES = { "⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏" };
+    private static final int SPINNER_SPEED_MS = 80;
+
     private static final FpsStats fpsStats = new FpsStats();
-    private static volatile boolean renderFailed = false;
+
+    private static volatile java.lang.reflect.Field _fpsfield;
+    private static volatile boolean _fpsfieldresolved;
 
     private OverlayRenderer() {}
 
     public static void render(DrawContext context, MinecraftClient client) {
-        if (renderFailed) return;
-
-        try {
-            renderInternal(context, client);
-        } catch (Throwable t) {
-            renderFailed = true;
-            HeliumClient.LOGGER.warn("overlay disabled on this mc version ({})", t.getClass().getSimpleName());
-        }
+        renderspinner(context, client);
+        renderInternal(context, client);
     }
 
     private static void renderInternal(DrawContext context, MinecraftClient client) {
@@ -36,7 +37,7 @@ public final class OverlayRenderer {
         if (client.player == null) return;
         if (client.options.hudHidden) return;
 
-        fpsStats.updateFps(client.getCurrentFps());
+        fpsStats.updateFps(getfps(client));
 
         int screenWidth = client.getWindow().getScaledWidth();
         int screenHeight = client.getWindow().getScaledHeight();
@@ -158,6 +159,79 @@ public final class OverlayRenderer {
         context.fill(x + width, y + cornerRadius, x + width + 1, y + height - cornerRadius, cornerColor);
         context.fill(x + cornerRadius, y - 1, x + width - cornerRadius, y, cornerColor);
         context.fill(x + cornerRadius, y + height, x + width - cornerRadius, y + height + 1, cornerColor);
+    }
+
+    private static void renderspinner(DrawContext context, MinecraftClient client) {
+        if (!AsyncPackReloader.isloading()) return;
+        renderglobalspinner(context, client);
+    }
+
+    public static void renderglobalspinner(DrawContext context, MinecraftClient client) {
+        if (!AsyncPackReloader.isloading()) return;
+
+        long time = Util.getMeasuringTimeMs();
+        int frame = (int) ((time / SPINNER_SPEED_MS) % SPINNER_FRAMES.length);
+        String text = SPINNER_FRAMES[frame] + " Reloading packs...";
+
+        int x = 10;
+        int y = client.getWindow().getScaledHeight() - 20;
+        int padding = 6;
+        int bgx = x - padding;
+        int bgy = y - padding + 2;
+        int bgw = client.textRenderer.getWidth(text) + padding * 2;
+        int bgh = 14;
+
+        drawroundedbox(context, bgx, bgy, bgw, bgh, 4, 0xDD000000);
+        context.drawText(client.textRenderer, Text.literal(text), x, y, 0xFFFFFFFF, true);
+    }
+
+    private static void drawroundedbox(DrawContext context, int x, int y, int w, int h, int radius, int color) {
+        context.fill(x + radius, y, x + w - radius, y + h, color);
+        context.fill(x, y + radius, x + radius, y + h - radius, color);
+        context.fill(x + w - radius, y + radius, x + w, y + h - radius, color);
+
+        context.fill(x + 1, y + 1, x + radius, y + radius, color);
+        context.fill(x + w - radius, y + 1, x + w - 1, y + radius, color);
+        context.fill(x + 1, y + h - radius, x + radius, y + h - 1, color);
+        context.fill(x + w - radius, y + h - radius, x + w - 1, y + h - 1, color);
+    }
+
+    public static void renderglobal(DrawContext context, MinecraftClient client) {
+        if (client == null) return;
+        try {
+            renderglobalspinner(context, client);
+        } catch (Throwable ignored) {}
+    }
+
+    private static int getfps(MinecraftClient client) {
+        try {
+            return client.getCurrentFps();
+        } catch (NoSuchMethodError e) {
+            if (!_fpsfieldresolved) {
+                try {
+                    String mapped = net.fabricmc.loader.api.FabricLoader.getInstance()
+                            .getMappingResolver()
+                            .mapFieldName("intermediary",
+                                    "net.minecraft.class_310",
+                                    "field_1728",
+                                    "I");
+                    java.lang.reflect.Field f = MinecraftClient.class.getDeclaredField(mapped);
+                    f.setAccessible(true);
+                    _fpsfield = f;
+                } catch (Throwable t) {
+                    HeliumClient.LOGGER.warn("could not resolve currentFps field");
+                }
+                _fpsfieldresolved = true;
+            }
+            if (_fpsfield != null) {
+                try {
+                    return _fpsfield.getInt(null);
+                } catch (Throwable t) {
+                    return 0;
+                }
+            }
+            return 0;
+        }
     }
 
     public static FpsStats getFpsStats() {

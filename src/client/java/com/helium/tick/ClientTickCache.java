@@ -74,6 +74,6 @@ public final class ClientTickCache {
     }
 
     public static long packPos(int x, int y, int z) {
-        return ((long) x & 0x3FFFFFFL) << 38 | ((long) y & 0xFFFL) << 26 | ((long) z & 0x3FFFFFFL);
+        return ((long) x & 0x3FFFFFFL) << 38 | ((long) (y + 64) & 0xFFFL) << 26 | ((long) z & 0x3FFFFFFL);
     }
 }

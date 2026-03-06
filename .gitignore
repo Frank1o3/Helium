@@ -21,6 +21,9 @@ desktop.ini
 
 MODRINTH_README.md
 
+# Build tracking
+.build_number
+
 # Fabric
 run/
 logs/

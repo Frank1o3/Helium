@@ -50,7 +50,21 @@ public abstract class SodiumOptionsGUILegacyMixin {
 
             @SuppressWarnings("unchecked")
             List<Object> pages = (List<Object>) helium$pagesField.get(this);
-            pages.add(helium$dummyPage);
+            
+            boolean alreadyExists = false;
+            for (Object page : pages) {
+                try {
+                    Object pageName = page.getClass().getMethod("getName").invoke(page);
+                    if (pageName.toString().contains("Helium")) {
+                        alreadyExists = true;
+                        break;
+                    }
+                } catch (Throwable ignored) {}
+            }
+            
+            if (!alreadyExists) {
+                pages.add(helium$dummyPage);
+            }
 
             helium$previousPage = helium$currentPageField.get(this);
         } catch (Throwable t) {

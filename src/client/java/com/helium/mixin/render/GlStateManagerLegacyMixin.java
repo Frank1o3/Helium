@@ -2,10 +2,12 @@ package com.helium.mixin.render;
 
 import com.helium.HeliumClient;
 import com.helium.render.GLStateCache;
+import com.helium.render.ShaderUniformCache;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(targets = "com.mojang.blaze3d.platform.GlStateManager", remap = false)
 public abstract class GlStateManagerLegacyMixin {
@@ -97,4 +99,11 @@ public abstract class GlStateManagerLegacyMixin {
             }
         }
     }
+
+    @Inject(method = "_glGetUniformLocation", at = @At("HEAD"), cancellable = true)
+    private static void helium$cacheuniformlocation(int program, CharSequence name, CallbackInfoReturnable<Integer> cir) {
+        if (!ShaderUniformCache.isenabled()) return;
+        cir.setReturnValue(ShaderUniformCache.getuniform(program, name));
+    }
+
 }

@@ -6,14 +6,33 @@ plugins {
 version = project.mod_version
 group = project.maven_group
 
+def mcVersion = project.minecraft_version
+def buildNumberFile = file("${projectDir}/.build_number")
+
+def getNextBuildNumber = {
+    int num = 1
+    if (buildNumberFile.exists()) {
+        try { num = buildNumberFile.text.trim().toInteger() + 1 } catch (ignored) { num = 1 }
+    }
+    buildNumberFile.text = "$num"
+    return num
+}
+
+def getCurrentBuildNumber = {
+    if (buildNumberFile.exists()) {
+        try { return buildNumberFile.text.trim().toInteger() } catch (ignored) { return 0 }
+    }
+    return 0
+}
+
 base {
     archivesName = project.archives_base_name
 }
 
 repositories {
     maven {
-        name = 'Xander Maven'
-        url = 'https://maven.isxander.dev/releases'
+        name = 'Shedaniel'
+        url = 'https://maven.shedaniel.me/'
     }
     maven {
         name = 'Terraformers'
@@ -33,6 +52,7 @@ repositories {
 }
 
 loom {
+    accessWidenerPath = file("src/main/resources/helium.accesswidener")
     splitEnvironmentSourceSets()
 
     mods {
@@ -48,10 +68,15 @@ dependencies {
     mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
-    include(modImplementation("dev.isxander:yet-another-config-lib:${project.yacl_version}"))
+    
+    // cloth config
+    modApi("me.shedaniel.cloth:cloth-config-fabric:${project.cloth_config_version}") {
+        exclude(group: "net.fabricmc.fabric-api")
+    }
+    
     modCompileOnly "com.terraformersmc:modmenu:${project.modmenu_version}"
     modCompileOnly "net.caffeinemc:sodium-fabric-api:${project.sodium_api_version}"
-
+    modCompileOnly "maven.modrinth:sodium:mc1.21.11-0.8.2-fabric"
 }
 
 processResources {
@@ -79,5 +104,58 @@ jar {
 
     from("LICENSE") {
         rename { "${it}_${inputs.properties.archivesName}" }
+    }
+}
+
+// ─── Publish Jar ───────────────────────────────────────────────────────────────
+// ./gradlew publish - creates a clean, professional release jar
+// Output: build/publish/Helium-1.6.1+mc1.21.11.jar
+
+tasks.register('publishJar', Copy) {
+    dependsOn remapJar
+    group = 'helium'
+    description = 'Builds a release-ready jar with a professional name'
+
+    def outputDir = file("${buildDir}/publish")
+    def jarName = "Helium-${project.mod_version}+mc${mcVersion}.jar"
+
+    from(remapJar.archiveFile)
+    into(outputDir)
+    rename { jarName }
+
+    doFirst { outputDir.mkdirs() }
+    doLast { println "\n  ✦ Published: ${outputDir}/${jarName}\n" }
+}
+
+tasks.register('release') {
+    dependsOn publishJar
+    group = 'helium'
+    description = 'Alias for publishJar - creates release-ready jar'
+}
+
+// ─── Dev Build ─────────────────────────────────────────────────────────────────
+// ./gradlew buildDev - creates a dev jar with auto-incrementing build number
+// Output: build/dev/Helium-1.6.1+mc1.21.11-dev.42.jar
+
+tasks.register('buildDev') {
+    dependsOn remapJar
+    group = 'helium'
+    description = 'Builds a dev jar with auto-incrementing build number'
+
+    outputs.upToDateWhen { false }
+
+    doLast {
+        def buildNum = getNextBuildNumber()
+        def outputDir = file("${buildDir}/dev")
+        def jarName = "Helium-${project.mod_version}+mc${mcVersion}-dev.${buildNum}.jar"
+
+        outputDir.mkdirs()
+        copy {
+            from remapJar.archiveFile
+            into outputDir
+            rename { jarName }
+        }
+
+        println "\n  ✦ Dev Build #${buildNum}: ${outputDir}/${jarName}\n"
     }
 }

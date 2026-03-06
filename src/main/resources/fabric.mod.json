@@ -23,10 +23,12 @@
   "mixins": [
     "helium.mixins.json"
   ],
+  "accessWidener": "helium.accesswidener",
   "depends": {
     "minecraft": ">=1.21.1 <=1.21.11",
     "java": ">=21",
-    "sodium": ">=0.5.0"
+    "sodium": ">=0.5.0",
+    "cloth-config": ">=15.0.0"
   },
   "suggests": {
     "lithium": "*",

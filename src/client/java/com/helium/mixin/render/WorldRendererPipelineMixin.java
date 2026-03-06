@@ -2,6 +2,7 @@ package com.helium.mixin.render;
 
 import com.helium.HeliumClient;
 import com.helium.config.HeliumConfig;
+import com.helium.render.DevModeOptimizer;
 import com.helium.render.RenderPipeline;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.WorldRenderer;
@@ -22,8 +23,13 @@ public abstract class WorldRendererPipelineMixin {
         if (helium$failed) return;
         try {
             HeliumConfig config = HeliumClient.getConfig();
-            if (config == null || !config.modEnabled || !config.renderPipelining) return;
-            if (!RenderPipeline.isInitialized()) return;
+            if (config == null || !config.modEnabled) return;
+
+            if (config.devMode && DevModeOptimizer.isActive()) {
+                DevModeOptimizer.onFrameStart();
+            }
+
+            if (!config.renderPipelining || !RenderPipeline.isInitialized()) return;
 
             MinecraftClient client = MinecraftClient.getInstance();
             int maxFps = client.options.getMaxFps().getValue();

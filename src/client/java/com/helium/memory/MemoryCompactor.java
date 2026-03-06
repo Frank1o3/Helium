@@ -2,13 +2,14 @@ package com.helium.memory;
 
 import com.helium.HeliumClient;
 
-import java.lang.ref.WeakReference;
+import java.util.Collections;
 import java.util.Map;
+import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 public final class MemoryCompactor {
 
-    private static final ConcurrentHashMap<String, WeakReference<String>> STRING_INTERN_POOL = new ConcurrentHashMap<>(4096);
+    private static final Map<String, String> STRING_INTERN_POOL = Collections.synchronizedMap(new WeakHashMap<>(4096));
     private static final ConcurrentHashMap<Long, int[]> PALETTE_DEDUP = new ConcurrentHashMap<>(1024);
 
     private static long lastCompactTick = 0;
@@ -20,13 +21,10 @@ public final class MemoryCompactor {
 
     public static String deduplicateString(String value) {
         if (value == null) return null;
-        WeakReference<String> ref = STRING_INTERN_POOL.get(value);
-        if (ref != null) {
-            String existing = ref.get();
-            if (existing != null) return existing;
-        }
+        String existing = STRING_INTERN_POOL.get(value);
+        if (existing != null) return existing;
         if (STRING_INTERN_POOL.size() < MAX_STRING_POOL_SIZE) {
-            STRING_INTERN_POOL.put(value, new WeakReference<>(value));
+            STRING_INTERN_POOL.put(value, value);
         }
         return value;
     }
@@ -57,8 +55,6 @@ public final class MemoryCompactor {
     }
 
     public static void compact() {
-        STRING_INTERN_POOL.entrySet().removeIf(entry -> entry.getValue().get() == null);
-
         if (PALETTE_DEDUP.size() > 8192) {
             int toRemove = PALETTE_DEDUP.size() / 4;
             var it = PALETTE_DEDUP.entrySet().iterator();

@@ -11,6 +11,7 @@ public final class FastWorldLoadingOptimizer {
     private static volatile boolean enabled = false;
     private static volatile long loadStartTime = 0;
     private static volatile long loadEndTime = 0;
+    private static volatile long lastElapsedMs = 0;
 
     private FastWorldLoadingOptimizer() {}
 
@@ -45,8 +46,8 @@ public final class FastWorldLoadingOptimizer {
     public static void onWorldLoadEnd() {
         if (!enabled || loadStartTime == 0) return;
         loadEndTime = System.currentTimeMillis();
-        long elapsed = loadEndTime - loadStartTime;
-        HeliumClient.LOGGER.info("[helium] world load completed in {}ms", elapsed);
+        lastElapsedMs = loadEndTime - loadStartTime;
+        HeliumClient.LOGGER.info("[helium] world load completed in {}ms", lastElapsedMs);
         loadStartTime = 0;
     }
 
@@ -65,6 +66,6 @@ public final class FastWorldLoadingOptimizer {
     }
 
     public static long getLastLoadTimeMs() {
-        return loadEndTime - loadStartTime;
+        return lastElapsedMs;
     }
 }

@@ -78,12 +78,67 @@ public class HeliumConfig {
     public int displaySyncRefreshRate = -1;
     public boolean temporalReprojection = false;
     public boolean fullbright = false;
+    public int fullbrightStrength = 10;
     public boolean fastAnimations = false;
-    public boolean cachedEnumValues = true;
-    public boolean fastWorldLoading = false;
+    public boolean cachedEnumValues = false;
+    public boolean fastWorldLoading = true;
     public boolean fastIpPing = true;
 
-    public boolean devMode = true;
+    public boolean suppressOpenGLErrors = true;
+    public boolean fastFramebufferBlit = true;
+    public boolean poseStackPooling = true;
+    public boolean fastBambooLight = true;
+    public boolean optimizedLightEngine = true;
+    public boolean screenshotLeakFix = true;
+    public boolean framebufferCleaner = true;
+    public boolean instantLanguageChange = true;
+    public boolean enableReflex = true;
+    public long reflexOffsetNs = 0L;
+    public boolean reflexDebug = false;
+    public String leafCullingMode = "FAST";
+    public int leafCullingDepth = 2;
+    public float leafCullingRandomRejection = 0.2f;
+    public boolean leafCullingMangroveRoots = false;
+    public boolean particleLOD = false;
+    public double particleLODDistance = 16.0;
+    public double particleLODReduction = 0.3;
+    public boolean reduceFpsWhenInactive = false;
+    public int inactiveFpsLimit = 10;
+    public boolean reduceRenderDistanceWhenInactive = false;
+    public int inactiveRenderDistance = 4;
+
+    public boolean hotbarOptimizer = true;
+    public boolean hotbarMultiSwitch = false;
+    public boolean smoothHotbar = true;
+
+    public boolean forceSkinParts = true;
+
+    public boolean asyncPackReload = true;
+
+    public int menuFramerateLimit = 0;
+
+    public boolean acceleratedText = false;
+
+    public boolean shaderUniformCache = true;
+
+    public boolean signTextCulling = true;
+    public boolean rainCulling = true;
+    public boolean beaconBeamCulling = true;
+    public boolean paintingCulling = true;
+    public boolean itemFrameCulling = true;
+    public boolean itemFrameLOD = false;
+    public int itemFrameLODRange = 128;
+
+    public boolean objectDeduplication = true;
+
+    public boolean glContextUpgrade = true;
+    public boolean jomlFastMath = true;
+    public boolean fastRandom = true;
+    public boolean directStateAccess = true;
+    public boolean renderbufferDepth = false;
+    public boolean oneClickCrafting = false;
+
+    public boolean devMode = false;
 
 
     public static HeliumConfig load() {
@@ -103,6 +158,25 @@ public class HeliumConfig {
         HeliumConfig cfg = new HeliumConfig();
         cfg.save();
         return cfg;
+    }
+
+    public String renderingsnapshot() {
+        return entityCulling + "," + entityCullDistance + "," +
+                blockEntityCulling + "," + blockEntityCullDistance + "," +
+                particleCulling + "," + particleCullDistance + "," +
+                particleLimiting + "," + maxParticles + "," +
+                particlePriority + "," + particleBatching + "," +
+                animationThrottling + "," + fastMath + "," +
+                glStateCache + "," + fastAnimations + "," +
+                cachedEnumValues + "," + modelCache + "," + modelCacheMaxMb + "," +
+                leafCullingMode + "," + leafCullingDepth + "," +
+                leafCullingMangroveRoots + "," +
+                signTextCulling + "," + rainCulling + "," +
+                beaconBeamCulling + "," + paintingCulling + "," +
+                itemFrameCulling + "," + itemFrameLOD + "," + itemFrameLODRange + "," +
+                renderPipelining + "," + fastFramebufferBlit + "," +
+                poseStackPooling + "," + fastBambooLight + "," +
+                optimizedLightEngine + "," + fullbright;
     }
 
     public void save() {
@@ -195,6 +269,7 @@ public class HeliumConfig {
         this.displaySyncRefreshRate = other.displaySyncRefreshRate;
         this.temporalReprojection = other.temporalReprojection;
         this.fullbright = other.fullbright;
+        this.fullbrightStrength = other.fullbrightStrength;
         this.fastAnimations = other.fastAnimations;
         this.cachedEnumValues = other.cachedEnumValues;
         this.fastWorldLoading = other.fastWorldLoading;
@@ -206,5 +281,49 @@ public class HeliumConfig {
         this.windowStyle = other.windowStyle;
         this.windowMaterial = other.windowMaterial;
         this.windowCorner = other.windowCorner;
+        this.suppressOpenGLErrors = other.suppressOpenGLErrors;
+        this.fastFramebufferBlit = other.fastFramebufferBlit;
+        this.poseStackPooling = other.poseStackPooling;
+        this.fastBambooLight = other.fastBambooLight;
+        this.optimizedLightEngine = other.optimizedLightEngine;
+        this.screenshotLeakFix = other.screenshotLeakFix;
+        this.framebufferCleaner = other.framebufferCleaner;
+        this.instantLanguageChange = other.instantLanguageChange;
+        this.enableReflex = other.enableReflex;
+        this.reflexOffsetNs = other.reflexOffsetNs;
+        this.reflexDebug = other.reflexDebug;
+        this.leafCullingMode = other.leafCullingMode;
+        this.leafCullingDepth = other.leafCullingDepth;
+        this.leafCullingRandomRejection = other.leafCullingRandomRejection;
+        this.leafCullingMangroveRoots = other.leafCullingMangroveRoots;
+        this.particleLOD = other.particleLOD;
+        this.particleLODDistance = other.particleLODDistance;
+        this.particleLODReduction = other.particleLODReduction;
+        this.reduceFpsWhenInactive = other.reduceFpsWhenInactive;
+        this.inactiveFpsLimit = other.inactiveFpsLimit;
+        this.reduceRenderDistanceWhenInactive = other.reduceRenderDistanceWhenInactive;
+        this.inactiveRenderDistance = other.inactiveRenderDistance;
+        this.hotbarOptimizer = other.hotbarOptimizer;
+        this.hotbarMultiSwitch = other.hotbarMultiSwitch;
+        this.smoothHotbar = other.smoothHotbar;
+        this.forceSkinParts = other.forceSkinParts;
+        this.asyncPackReload = other.asyncPackReload;
+        this.menuFramerateLimit = other.menuFramerateLimit;
+        this.acceleratedText = other.acceleratedText;
+        this.shaderUniformCache = other.shaderUniformCache;
+        this.signTextCulling = other.signTextCulling;
+        this.rainCulling = other.rainCulling;
+        this.beaconBeamCulling = other.beaconBeamCulling;
+        this.paintingCulling = other.paintingCulling;
+        this.itemFrameCulling = other.itemFrameCulling;
+        this.itemFrameLOD = other.itemFrameLOD;
+        this.itemFrameLODRange = other.itemFrameLODRange;
+        this.objectDeduplication = other.objectDeduplication;
+        this.glContextUpgrade = other.glContextUpgrade;
+        this.jomlFastMath = other.jomlFastMath;
+        this.fastRandom = other.fastRandom;
+        this.directStateAccess = other.directStateAccess;
+        this.renderbufferDepth = other.renderbufferDepth;
+        this.oneClickCrafting = other.oneClickCrafting;
     }
 }

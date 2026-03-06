@@ -47,6 +47,12 @@
   "helium.option.gl_state_cache": "GL Durum Önbelleği",
   "helium.option.gl_state_cache.tooltip": "Gereksiz çağrıları atlamak için OpenGL durumunu önbellekle. ImmediatelyFast ile otomatik devre dışı kalır.",
 
+  "helium.option.accelerated_text": "Accelerated Text",
+  "helium.option.accelerated_text.tooltip": "Caches font glyph lookups to significantly speed up text rendering. Biggest impact on formatted text like chat, HUD, nametags, and debug screens.",
+
+  "helium.option.shader_uniform_cache": "Shader Uniform Cache",
+  "helium.option.shader_uniform_cache.tooltip": "Caches glGetUniformLocation results per shader program. Eliminates repeated expensive GL calls for uniform lookups. Auto-invalidates on resource reload, title screen, and Iris shader changes.",
+
   "helium.option.model_cache": "Model Önbelleği",
   "helium.option.model_cache.tooltip": "Blok modellerini bellekte önbellekle. Tekrarlanan model aramalarını azaltır.",
   "helium.option.model_cache_size": "Model Önbellek Boyutu",
@@ -138,11 +144,28 @@
   "helium.option.show_biome": "Show Biome",
   "helium.option.show_biome.tooltip": "Display the current biome name in the overlay.",
   "helium.key.category": "Helium",
+  "key.category.helium.keys": "Helium",
   "helium.key.fullbright": "Toggle Fullbright",
   "helium.config.category.tools": "Tools",
   "helium.config.category.tools.tooltip": "Export and import your Helium configuration.",
   "helium.config.export": "Export Config",
   "helium.config.export.description": "Save current settings to helium-export.json.",
   "helium.config.import": "Import Config",
-  "helium.config.import.description": "Load settings from helium-export.json."
+  "helium.config.import.description": "Load settings from helium-export.json.",
+
+  "helium.group.hotbar": "Hotbar Optimizer",
+  "helium.option.hotbar_optimizer": "Hotbar Optimizer",
+  "helium.option.hotbar_optimizer.tooltip": "Send hotbar slot changes to the server immediately instead of waiting for the next tick. Reduces ghost totems and improves attribute swapping. Auto-disabled on flagged servers.",
+  "helium.option.hotbar_multi_switch": "Allow Multiple Switches / Tick",
+  "helium.option.hotbar_multi_switch.tooltip": "Allow sending multiple hotbar slot sync packets within a single game tick. Off by default because some anticheats may flag this.",
+  "helium.page.tweaks": "Tweaks",
+  "helium.group.qol": "Quality of Life",
+  "helium.group.tweaks": "Tweaks",
+  "helium.option.force_skin_parts": "Force Skin Layers",
+  "helium.option.force_skin_parts.tooltip": "Always show your skin layers based on your client skin options. Also auto-refreshes skin parts on dimension change and respawn.",
+
+  "helium.option.async_pack_reload": "Async Pack Reload",
+  "helium.option.async_pack_reload.tooltip": "Reload resource packs in the background without freezing the game. Removes the full-screen loading overlay and keeps gameplay smooth.",
+
+  "helium.key.reload_packs": "Reload Resource Packs"
 }

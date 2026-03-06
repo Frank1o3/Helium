@@ -37,14 +37,18 @@ public final class AdaptiveSyncManager {
     }
 
     private static boolean detectAdaptiveSync() {
-        if (GpuDetector.isNvidia()) {
-            String renderer = GpuDetector.getRendererString().toLowerCase();
-            return renderer.contains("gtx 10") || renderer.contains("gtx 16")
-                    || renderer.contains("rtx") || renderer.contains("gtx 9");
-        }
+        try {
+            long monitor = GLFW.glfwGetPrimaryMonitor();
+            if (monitor != 0) {
+                var vidMode = GLFW.glfwGetVideoMode(monitor);
+                if (vidMode != null && vidMode.refreshRate() > 60) {
+                    return true;
+                }
+            }
+        } catch (Throwable ignored) {}
 
-        if (GpuDetector.isAmd()) {
-            return true;
+        if (GpuDetector.isNvidia() || GpuDetector.isAmd()) {
+            return refreshRate > 60;
         }
 
         return false;
