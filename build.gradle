@@ -75,9 +75,8 @@ dependencies {
     }
     
     modCompileOnly "com.terraformersmc:modmenu:${project.modmenu_version}"
-    // Sodium (compile-only, no runtime bundling)
-    def sodiumVersion = "mc${project.minecraft_version}-0.7.3-fabric"
-    modCompileOnly "maven.modrinth:sodium:${sodiumVersion}"
+    modCompileOnly "net.caffeinemc:sodium-fabric-api:${project.sodium_api_version}+mc${project.minecraft_version}"
+    modCompileOnly "maven.modrinth:sodium:mc${project.minecraft_version}-${project.sodium_api_version}-fabric"
 }
 
 processResources {
